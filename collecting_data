@@ -17,14 +17,15 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 tweets = []
 
-#if you don't add since as one of the parameter, Twitter will sample the last 6-9 days worth of data depending
-#on how many tweets there are with the specific hashtag, keyword, or key phrase that you are looking for
+"""if you don't add since as one of the parameters, Twitter will sample the last 6-9 days worth of data depending
+on how many total tweets there are with the specific hashtag, keyword, or key phrase that you are looking for. You can
+manually add in the number of items (or tweets) you want to get back in the items section."""
 
-for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=200, since='2020-02-13').items(10):
+for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=200, since='2020-02-13').items(50000):
 
 #Don't forget that these are just a few of the fields that you can pull out of the JSON file. There are many more such as
 #mentions, URLs, and hashtags which you can get directly from the JSON file or pull out using various Regex commands in Pandas
-  try: 
+	try: 
 		data = [tweet.created_at, tweet.id, tweet.text, tweet.user._json['screen_name'], tweet.user._json['name'], tweet.user._json['created_at']]
 		data = tuple(data)
 		tweets.append(data)
@@ -38,8 +39,8 @@ for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=200, since='20
 
 df = pd.DataFrame(tweets, columns = ['created_at','tweet_id', 'tweet_text', 'screen_name', 'name', 'account_creation_date'])
 
-#you can save dataframe to a csv by using the next line of code and then play with the data in Excel, or 
-#you can run this script in Jupyter notebooks and use the dataframe df from above
+"""You can save dataframe to a csv by using the next line of code and then play with the data in Excel, or 
+you can run this script in Jupyter notebooks and use the dataframe df from above"""
 
 df.to_csv('Put direction of file here, such as: Documents/name_of_file.csv', index=False) 
 
