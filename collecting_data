@@ -38,8 +38,8 @@ for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=200, since='20
 
 df = pd.DataFrame(tweets, columns = ['created_at','tweet_id', 'tweet_text', 'screen_name', 'name', 'account_creation_date'])
 
-#you can save dataframe to a csv by using the next line of code, or you can run this script in Jupyter notebooks and open
-# it up directly in Pandas using the dataframe df
+#you can save dataframe to a csv by using the next line of code and then play with the data in Excel, or 
+#you can run this script in Jupyter notebooks and use the dataframe df from above
 
 df.to_csv('Put direction of file here, such as: Documents/name_of_file.csv', index=False) 
 
