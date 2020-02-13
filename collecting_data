@@ -1,0 +1,45 @@
+import tweepy
+from tweepy import OAuthHandler
+import pandas as pd
+import json
+
+#don't forget to add your tokens and keys below
+
+access_token = ''
+access_token_secret = ''
+consumer_key = ''
+consumer_secret = ''
+
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+
+api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+
+tweets = []
+
+#if you don't add since as one of the parameter, Twitter will sample the last 6-9 days worth of data depending
+#on how many tweets there are with the specific hashtag, keyword, or key phrase that you are looking for
+
+for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=200, since='2020-02-13').items(10):
+
+#Don't forget that these are just a few of the fields that you can pull out of the JSON file. There are many more such as
+#mentions, URLs, and hashtags which you can get directly from the JSON file or pull out using various Regex commands in Pandas
+  try: 
+		data = [tweet.created_at, tweet.id, tweet.text, tweet.user._json['screen_name'], tweet.user._json['name'], tweet.user._json['created_at']]
+		data = tuple(data)
+		tweets.append(data)
+
+	except tweepy.TweepError as e:
+		print(e.reason)
+		continue
+
+	except StopIteration:
+		break
+
+df = pd.DataFrame(tweets, columns = ['created_at','tweet_id', 'tweet_text', 'screen_name', 'name', 'account_creation_date'])
+
+#you can save dataframe to a csv by using the next line of code, or you can run this script in Jupyter notebooks and open
+# it up directly in Pandas using the dataframe df
+
+df.to_csv('Put direction of file here, such as: Documents/name_of_file.csv', index=False) 
+
