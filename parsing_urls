@@ -1,0 +1,59 @@
+import pandas as pd
+import ast
+
+df = pd.read_csv('your_file_path')
+
+"""sometimes the JSON file comes formatted as a string. this code turns it back into a list which you can then unpack"""
+df['urls'] = df.urls.apply(lambda x: ast.literal_eval(x))
+
+"""filters out all the rows that don't have any urls"""
+df = df[df.urls.map(lambda x: len(x) >= 1)]
+
+"""a function to extract the expanded_url or urls from the JSON object"""
+def unpack(row):
+    array = []
+    for i in row['urls']:
+        array.append(i['expanded_url'])
+    return array
+
+"""create a new column using your function which contains the extracted url or urls"""
+df['expanded_urls'] = df.apply(unpack, axis=1)
+
+"""function that takes the list of urls in each row, aggregates them, and then returns the top 10 links from your dataset"""
+def urls(col):
+    
+    def mapper(s):
+        all_vals = list()
+
+        for l in s:
+            [all_vals.append(x) for x in l]
+
+        all_vals.sort()
+        return all_vals
+
+    def reducer(l):
+        all_counts = dict()
+        prev = l[0]
+        count = 0
+
+        for x in l:
+            if x == prev:
+                count = count + 1
+            else:
+                all_counts[prev] = count
+                prev = x
+                count = 1      
+
+        all_counts[prev] = count
+
+        return all_counts
+    
+    mapped = mapper(col)
+    reduced = reducer(mapped)
+    reduced = dict(sorted(reduced.items(), key=lambda x: x[1], reverse=True))
+    
+    df = pd.DataFrame(list(reduced.items()), columns=['url', 'number']).head(10).sort_values('number', ascending=False)
+    return df
+    
+"""use the function on the column that houses your extracted_urls to get the top 10 urls"""
+urls(df.expanded_urls)
