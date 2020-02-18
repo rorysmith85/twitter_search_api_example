@@ -1,9 +1,6 @@
 import tweepy
 from tweepy import OAuthHandler
 import pandas as pd
-import json
-
-#don't forget to add your tokens and keys below
 
 access_token = ''
 access_token_secret = ''
@@ -17,16 +14,22 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 tweets = []
 
-"""if you don't add since as one of the parameters, Twitter will sample the last 6-9 days worth of data depending
+count = 1
+
+"""if you don't add since= as one of the parameters, Twitter will sample the last 7 days worth of data depending
 on how many total tweets there are with the specific hashtag, keyword, or key phrase that you are looking for. You can
-manually add in the number of items (or tweets) you want to get back in the items section."""
+manually add in the number of items (or tweets) you want to get back in the items() section."""
 
-for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=200, since='2020-02-13').items(50000):
+for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=450, since='2020-02-10').items(50000):
+	
+	print(count)
+	count += 1
 
-#Don't forget that these are just a few of the fields that you can pull out of the JSON file. There are many more such as
-#mentions, URLs, and hashtags which you can get directly from the JSON file or pull out using various Regex commands in Pandas
+"""Don't forget that these are just a few of the fields that you can pull from the REST API. There are many more fields, such as
+mentions and hashtags which you can get directly from the API. Alternatively you can pull these out using various Regex commands in Pandas"""
+
 	try: 
-		data = [tweet.created_at, tweet.id, tweet.text, tweet.user._json['screen_name'], tweet.user._json['name'], tweet.user._json['created_at']]
+		data = [tweet.created_at, tweet.id, tweet.text, tweet.user._json['screen_name'], tweet.user._json['name'], tweet.user._json['created_at'], tweet.entities['urls']]
 		data = tuple(data)
 		tweets.append(data)
 
@@ -37,10 +40,7 @@ for tweet in tweepy.Cursor(api.search, q="#medicalfreedom", count=200, since='20
 	except StopIteration:
 		break
 
-df = pd.DataFrame(tweets, columns = ['created_at','tweet_id', 'tweet_text', 'screen_name', 'name', 'account_creation_date'])
+df = pd.DataFrame(tweets, columns = ['created_at','tweet_id', 'tweet_text', 'screen_name', 'name', 'account_creation_date', 'urls'])
 
-"""You can save dataframe to a csv by using the next line of code and then play with the data in Excel, or 
-you can run this script in Jupyter notebooks and use the dataframe df from above"""
-
-df.to_csv('Put direction of file here, such as: Documents/name_of_file.csv', index=False) 
-
+"""add in the direction to the folder you want to save the CSV in as well as the name of the csv"""
+df.to_csv(example: '/Users/johnsmith/Desktop/medicalfreedom.csv', index=False) 
